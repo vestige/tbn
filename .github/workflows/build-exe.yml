@@ -22,8 +22,8 @@ jobs:
       - name: Install gems
         run: bundle install
 
-      - name: Build exe
-        run: bundle exec ocra tbn.rb --console --output cleaning_duty.exe
+      - name: Build exe with OCRAN
+        run: bundle exec ocran tbn.rb --console --output cleaning_duty.exe
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4

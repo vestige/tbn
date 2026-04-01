@@ -1,4 +1,4 @@
-require 'date'
+require "date"
 
 def make_members(count)
   labels = ("A".."Z").to_a + ("a".."z").to_a
@@ -33,25 +33,23 @@ def main
   puts "掃除当番表を作成します"
 
   print "開始日付を入力してください (例: 2026-04-03): "
-  start_date_input = STDIN.gets
-  raise "開始日付が入力されませんでした" if start_date_input.nil?
-  start_date_input = start_date_input.chomp
+  start_date_input = STDIN.gets&.chomp
 
   print "人数を入力してください (最大52): "
-  member_count_input = STDIN.gets
-  raise "人数が入力されませんでした" if member_count_input.nil?
-  member_count_input = member_count_input.chomp
+  member_count_input = STDIN.gets&.chomp
 
   print "何週間分作りますか？: "
-  weeks_input = STDIN.gets
-  raise "週間数が入力されませんでした" if weeks_input.nil?
-  weeks_input = weeks_input.chomp
+  weeks_input = STDIN.gets&.chomp
+
+  raise "開始日付が入力されませんでした" if start_date_input.nil? || start_date_input.empty?
+  raise "人数が入力されませんでした" if member_count_input.nil? || member_count_input.empty?
+  raise "週間数が入力されませんでした" if weeks_input.nil? || weeks_input.empty?
 
   start_date = Date.parse(start_date_input)
   member_count = Integer(member_count_input)
   weeks = Integer(weeks_input)
 
-  raise ArgumentError, "人数と週間数は 1 以上を入力してください。" if member_count <= 0 || weeks <= 0
+  raise ArgumentError, "人数と週間数は1以上を入力してください。" if member_count <= 0 || weeks <= 0
 
   schedule = generate_schedule(start_date, member_count, weeks)
 
@@ -60,17 +58,12 @@ def main
   schedule.each do |date, person|
     puts "#{date.strftime('%Y/%m/%d')} : #{person}"
   end
-
+rescue => e
+  warn "エラー: #{e.message}"
+ensure
   puts
   puts "Enterキーで終了します"
   STDIN.gets
-rescue => e
-  warn "エラー: #{e.message}"
-  puts "Enterキーで終了します"
-  STDIN.gets unless STDIN.closed?
 end
 
-# exe化時の依存関係チェック実行では main を動かさない
-unless defined?(OCRA) || defined?(OCRAN)
-  main
-end
+main if __FILE__ == $0
