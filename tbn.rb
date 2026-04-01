@@ -29,18 +29,24 @@ def generate_schedule(start_date, member_count, weeks)
   schedule
 end
 
-puts "掃除当番表を作成します"
+def main
+  puts "掃除当番表を作成します"
 
-print "開始日付を入力してください (例: 2026-04-03): "
-start_date_input = gets.chomp
+  print "開始日付を入力してください (例: 2026-04-03): "
+  start_date_input = STDIN.gets
+  raise "開始日付が入力されませんでした" if start_date_input.nil?
+  start_date_input = start_date_input.chomp
 
-print "人数を入力してください (最大52): "
-member_count_input = gets.chomp
+  print "人数を入力してください (最大52): "
+  member_count_input = STDIN.gets
+  raise "人数が入力されませんでした" if member_count_input.nil?
+  member_count_input = member_count_input.chomp
 
-print "何週間分作りますか？: "
-weeks_input = gets.chomp
+  print "何週間分作りますか？: "
+  weeks_input = STDIN.gets
+  raise "週間数が入力されませんでした" if weeks_input.nil?
+  weeks_input = weeks_input.chomp
 
-begin
   start_date = Date.parse(start_date_input)
   member_count = Integer(member_count_input)
   weeks = Integer(weeks_input)
@@ -61,5 +67,10 @@ begin
 rescue => e
   warn "エラー: #{e.message}"
   puts "Enterキーで終了します"
-  STDIN.gets
+  STDIN.gets unless STDIN.closed?
+end
+
+# exe化時の依存関係チェック実行では main を動かさない
+unless defined?(OCRA) || defined?(OCRAN)
+  main
 end
