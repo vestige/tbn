@@ -2,17 +2,12 @@ require 'date'
 
 def make_members(count)
   labels = ("A".."Z").to_a + ("a".."z").to_a
-
-  if count > labels.length
-    raise ArgumentError, "人数は最大 #{labels.length} 人までです。"
-  end
-
+  raise ArgumentError, "人数は最大 #{labels.length} 人までです。" if count > labels.length
   labels.first(count).map { |label| "#{label}さん" }
 end
 
 def generate_schedule(start_date, member_count, weeks)
   members = make_members(member_count)
-
   schedule = []
   last_person = nil
   round_members = []
@@ -27,7 +22,6 @@ def generate_schedule(start_date, member_count, weeks)
 
     person = round_members[i % member_count]
     date = start_date + (i * 7)
-
     schedule << [date, person]
     last_person = person
   end
@@ -51,10 +45,7 @@ begin
   member_count = Integer(member_count_input)
   weeks = Integer(weeks_input)
 
-  if member_count <= 0 || weeks <= 0
-    puts "人数と週間数は 1 以上を入力してください。"
-    exit
-  end
+  raise ArgumentError, "人数と週間数は 1 以上を入力してください。" if member_count <= 0 || weeks <= 0
 
   schedule = generate_schedule(start_date, member_count, weeks)
 
@@ -64,7 +55,11 @@ begin
     puts "#{date.strftime('%Y/%m/%d')} : #{person}"
   end
 
-rescue ArgumentError => e
-  puts "エラー: #{e.message}"
-  puts "開始日付は 2026-04-03 のように入力してください。" if e.message.include?("invalid date")
+  puts
+  puts "Enterキーで終了します"
+  STDIN.gets
+rescue => e
+  warn "エラー: #{e.message}"
+  puts "Enterキーで終了します"
+  STDIN.gets
 end
