@@ -1,0 +1,24 @@
+{
+  "name": "tbn",
+  "version": "1.0.0",
+  "description": "decide touban!",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/vestige/tbn.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/vestige/tbn/issues"
+  },
+  "homepage": "https://github.com/vestige/tbn#readme",
+  "dependencies": {
+    "@ruby/wasm-wasi": "^2.8.1-2.9.0"
+  }
+}

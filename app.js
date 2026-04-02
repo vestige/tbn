@@ -2,7 +2,7 @@ import { DefaultRubyVM } from "https://cdn.jsdelivr.net/npm/@ruby/wasm-wasi@late
 
 const errorEl = document.getElementById("error");
 const resultEl = document.getElementById("result");
-const runButton = document.getElementById("runButton");
+const runButton = document.getElementById("generateButton");
 
 let vm;
 
@@ -13,6 +13,9 @@ async function initRuby() {
 
   const rubyCode = await fetch("./tbn_wa.rb").then(r => r.text());
   vm.eval(rubyCode);
+
+  runButton.disabled = false;
+  document.getElementById("loading").style.display = "none";
 }
 
 function renderTable(items) {
