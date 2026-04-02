@@ -1,68 +1,183 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="ja">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Touban Lsit</title>
+  <title>Touban Maker</title>
   <style>
+    :root {
+      --bg: #f7f7fb;
+      --card: #ffffff;
+      --text: #222;
+      --muted: #666;
+      --border: #ddd;
+      --accent: #2f6feb;
+      --accent-hover: #1f57c3;
+      --error: #c62828;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
     body {
-      font-family: sans-serif;
-      max-width: 720px;
+      margin: 0;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: var(--bg);
+      color: var(--text);
+    }
+
+    .container {
+      max-width: 760px;
       margin: 40px auto;
       padding: 0 16px;
-      line-height: 1.6;
     }
+
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 24px;
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.05);
+    }
+
+    h1 {
+      margin-top: 0;
+      margin-bottom: 8px;
+      font-size: 28px;
+    }
+
+    p.description {
+      margin-top: 0;
+      color: var(--muted);
+    }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 16px;
+      margin-top: 20px;
+    }
+
     label {
       display: block;
-      margin-top: 12px;
+      font-weight: 600;
+      margin-bottom: 6px;
     }
-    input, button {
+
+    input {
+      width: 100%;
+      padding: 10px 12px;
+      border: 1px solid var(--border);
+      border-radius: 10px;
       font-size: 16px;
-      padding: 8px;
-      margin-top: 4px;
+      background: #fff;
     }
+
     button {
-      margin-top: 16px;
+      margin-top: 20px;
+      padding: 12px 18px;
+      border: none;
+      border-radius: 10px;
+      background: var(--accent);
+      color: white;
+      font-size: 16px;
+      font-weight: 700;
       cursor: pointer;
     }
+
+    button:hover {
+      background: var(--accent-hover);
+    }
+
+    .error {
+      margin-top: 16px;
+      color: var(--error);
+      font-weight: 700;
+      white-space: pre-wrap;
+    }
+
+    .result {
+      margin-top: 24px;
+    }
+
     table {
       width: 100%;
       border-collapse: collapse;
-      margin-top: 24px;
+      background: white;
+      border-radius: 12px;
+      overflow: hidden;
+      border: 1px solid var(--border);
     }
+
     th, td {
-      border: 1px solid #ccc;
-      padding: 8px;
+      padding: 12px;
+      border-bottom: 1px solid var(--border);
       text-align: left;
     }
-    .error {
-      color: red;
-      margin-top: 16px;
+
+    th {
+      background: #f0f4ff;
+    }
+
+    tr:last-child td {
+      border-bottom: none;
+    }
+
+    .footer-note {
+      margin-top: 18px;
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .loading {
+      margin-top: 10px;
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    @media (min-width: 640px) {
+      .form-grid {
+        grid-template-columns: repeat(3, 1fr);
+      }
     }
   </style>
 </head>
 <body>
-  <h1>Touban Lsit</h1>
+  <div class="container">
+    <div class="card">
+      <h1>Touban Maker</h1>
+      <p class="description">
+        開始日・人数・週間数を入力すると、掃除当番表を作成します。
+      </p>
 
-  <label>
-    開始日付
-    <input type="date" id="startDate" value="2026-04-03" />
-  </label>
+      <div class="form-grid">
+        <div>
+          <label for="startDate">開始日</label>
+          <input id="startDate" type="date" value="2026-04-03" />
+        </div>
 
-  <label>
-    人数
-    <input type="number" id="memberCount" value="8" min="1" max="52" />
-  </label>
+        <div>
+          <label for="memberCount">人数</label>
+          <input id="memberCount" type="number" min="1" max="52" value="8" />
+        </div>
 
-  <label>
-    何週間分
-    <input type="number" id="weeks" value="8" min="1" />
-  </label>
+        <div>
+          <label for="weeks">何週間分</label>
+          <input id="weeks" type="number" min="1" value="8" />
+        </div>
+      </div>
 
-  <button id="runButton">作成する</button>
+      <button id="generateButton" disabled>当番表を作成する</button>
+      <div id="loading" class="loading">Ruby.wasm を読み込み中です...</div>
+      <div id="error" class="error"></div>
+      <div id="result" class="result"></div>
 
-  <div id="error" class="error"></div>
-  <div id="result"></div>
+      <div class="footer-note">
+        人数は Aさん〜Zさん、aさん〜zさん の最大52人まで対応しています。
+      </div>
+    </div>
+  </div>
 
   <script type="module" src="./app.js"></script>
 </body>
