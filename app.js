@@ -1,4 +1,4 @@
-import { DefaultRubyVM } from "https://cdn.jsdelivr.net/npm/@ruby/4.0-wasm-wasi@2.9.0/dist/browser/+esm";
+import { DefaultRubyVM } from "https://cdn.jsdelivr.net/npm/@ruby/4.0-wasm-wasi@latest/dist/browser/+esm";
 
 window.addEventListener("DOMContentLoaded", () => {
   console.log("app.js loaded");
@@ -53,7 +53,7 @@ window.addEventListener("DOMContentLoaded", () => {
   async function initRuby() {
     loadingEl.textContent = "Ruby.wasm を初期化しています...";
 
-    const response = await fetch("https://cdn.jsdelivr.net/npm/@ruby/4.0-wasm-wasi@2.9.0/dist/ruby+stdlib.wasm");
+    const response = await fetch("https://cdn.jsdelivr.net/npm/@ruby/4.0-wasm-wasi@latest/dist/ruby+stdlib.wasm");
     const module = await WebAssembly.compileStreaming(response);
     vm = await DefaultRubyVM(module);
 
