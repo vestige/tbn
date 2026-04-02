@@ -1,97 +1,253 @@
 <!DOCTYPE html>
-<html lang="ja">
+<html lang="ja" class="h-full">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Toban Maker</title>
-  <style>
-    body {
-      font-family: sans-serif;
-      max-width: 760px;
-      margin: 40px auto;
-      padding: 0 16px;
-      line-height: 1.6;
+  <script>
+    (() => {
+      const savedTheme = localStorage.getItem("toban-theme");
+      if (savedTheme === "dark") {
+        document.documentElement.classList.add("dark");
+      }
+    })();
+  </script>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          boxShadow: {
+            float: "0 24px 60px rgba(15, 23, 42, 0.14)",
+            soft: "0 12px 30px rgba(15, 23, 42, 0.08)"
+          }
+        }
+      }
+    };
+  </script>
+  <style type="text/tailwindcss">
+    @layer base {
+      html {
+        @apply h-full scroll-smooth;
+      }
+
+      body {
+        @apply min-h-full bg-slate-50 text-slate-800 antialiased transition-colors duration-300 dark:bg-slate-950 dark:text-slate-100;
+        font-family: "Inter", "Noto Sans JP", sans-serif;
+      }
     }
 
-    .row {
-      margin: 12px 0;
+    @layer components {
+      .panel {
+        @apply rounded-[2rem] border border-white/70 bg-white/75 shadow-soft backdrop-blur-xl dark:border-white/10 dark:bg-slate-900/70 dark:shadow-float;
+      }
+
+      .field {
+        @apply space-y-2;
+      }
+
+      .field-label {
+        @apply text-sm font-medium text-slate-700 dark:text-slate-200;
+      }
+
+      .field-input {
+        @apply w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-base text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-teal-500 focus:ring-4 focus:ring-teal-500/15 dark:border-white/10 dark:bg-white/5 dark:text-white dark:placeholder:text-slate-400 dark:focus:border-teal-400 dark:focus:ring-teal-400/20;
+      }
+
+      .secondary-button {
+        @apply inline-flex items-center justify-center rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-medium text-slate-700 transition hover:border-slate-300 hover:bg-slate-50 dark:border-white/10 dark:bg-white/5 dark:text-slate-100 dark:hover:bg-white/10;
+      }
     }
 
-    label {
-      display: block;
-      font-weight: bold;
-      margin-bottom: 4px;
-    }
+    @layer utilities {
+      input[type="date"].field-input {
+        color-scheme: light;
+      }
 
-    input {
-      width: 100%;
-      max-width: 240px;
-      padding: 8px;
-      font-size: 16px;
-    }
+      .dark input[type="date"].field-input {
+        color-scheme: dark;
+      }
 
-    button {
-      margin-top: 16px;
-      padding: 10px 16px;
-      font-size: 16px;
-      cursor: pointer;
-    }
+      #loading {
+        @apply rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-700 dark:border-emerald-400/20 dark:bg-emerald-400/10 dark:text-emerald-200;
+      }
 
-    #loading {
-      margin-top: 12px;
-      color: #666;
-    }
+      #error {
+        @apply whitespace-pre-wrap rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700 dark:border-rose-400/20 dark:bg-rose-400/10 dark:text-rose-200;
+      }
 
-    #error {
-      margin-top: 12px;
-      color: #c62828;
-      white-space: pre-wrap;
-    }
+      #error:empty,
+      #loading:empty,
+      #result:empty {
+        display: none;
+      }
 
-    #result {
-      margin-top: 20px;
-    }
+      #result {
+        @apply overflow-hidden rounded-[1.75rem] border border-slate-200 bg-white shadow-soft dark:border-white/10 dark:bg-slate-900/70 dark:shadow-float;
+      }
 
-    table {
-      border-collapse: collapse;
-      width: 100%;
-    }
+      #result table {
+        @apply min-w-full divide-y divide-slate-200 dark:divide-white/10;
+      }
 
-    th, td {
-      border: 1px solid #ccc;
-      padding: 8px;
-      text-align: left;
-    }
+      #result thead {
+        @apply bg-slate-100/80 dark:bg-white/5;
+      }
 
-    th {
-      background: #f3f6ff;
+      #result th {
+        @apply px-6 py-4 text-left text-xs font-semibold uppercase tracking-[0.2em] text-slate-500 dark:text-slate-300;
+      }
+
+      #result td {
+        @apply px-6 py-4 text-sm text-slate-700 dark:text-slate-100;
+      }
+
+      #result tbody tr {
+        @apply border-t border-slate-100 transition-colors hover:bg-slate-50 dark:border-white/5 dark:hover:bg-white/5;
+      }
     }
   </style>
 </head>
-<body>
-  <h1>Toban Maker</h1>
+<body class="relative overflow-x-hidden">
+  <div class="absolute inset-0 -z-10 bg-[radial-gradient(circle_at_top_left,_rgba(45,212,191,0.18),_transparent_28%),radial-gradient(circle_at_top_right,_rgba(56,189,248,0.16),_transparent_26%),linear-gradient(180deg,_#f8fffd_0%,_#eef6ff_52%,_#f8fafc_100%)] dark:bg-[radial-gradient(circle_at_top_left,_rgba(45,212,191,0.22),_transparent_34%),radial-gradient(circle_at_top_right,_rgba(59,130,246,0.18),_transparent_30%),linear-gradient(180deg,_#020617_0%,_#0f172a_52%,_#111827_100%)]"></div>
+  <div class="absolute left-1/2 top-20 -z-10 h-72 w-72 -translate-x-1/2 rounded-full bg-teal-400/10 blur-3xl dark:bg-teal-400/10"></div>
 
-  <div class="row">
-    <label for="startDate">開始日</label>
-    <input id="startDate" type="date" value="2026-04-03" />
+  <main class="mx-auto flex min-h-screen w-full max-w-7xl items-center px-4 py-10 sm:px-6 lg:px-8">
+    <section class="grid w-full gap-8 lg:grid-cols-[1.08fr_0.92fr]">
+      <div class="panel p-8 sm:p-10">
+        <div class="flex items-start justify-between gap-4">
+          <div>
+            <span class="inline-flex w-fit rounded-full border border-teal-200 bg-teal-50 px-4 py-1 text-xs font-semibold uppercase tracking-[0.25em] text-teal-700 dark:border-teal-300/20 dark:bg-teal-300/10 dark:text-teal-200">
+              Weekly Rotation
+            </span>
+            <h1 class="mt-6 text-4xl font-semibold tracking-tight text-slate-900 sm:text-5xl dark:text-white">
+              Toban Maker
+            </h1>
+            <p class="mt-4 max-w-2xl text-base leading-7 text-slate-600 sm:text-lg dark:text-slate-300">
+              明るく見やすい画面で、当番表づくりをすっきり。テーマ切り替えにも対応しているので、昼も夜も使いやすい見た目で確認できます。
+            </p>
+          </div>
+
+          <button
+            id="themeToggle"
+            type="button"
+            class="secondary-button shrink-0 gap-2 px-4 py-2.5"
+            aria-label="テーマを切り替える"
+          >
+            <span id="themeToggleIcon">Mode</span>
+            <span id="themeToggleLabel">Dark</span>
+          </button>
+        </div>
+
+        <div class="mt-8 grid gap-4 sm:grid-cols-3">
+          <div class="rounded-2xl border border-slate-200 bg-white/80 p-4 dark:border-white/10 dark:bg-slate-950/40">
+            <p class="text-xs uppercase tracking-[0.2em] text-slate-400">Flexible</p>
+            <p class="mt-2 text-sm text-slate-600 dark:text-slate-200">明暗テーマをワンタップで切替</p>
+          </div>
+          <div class="rounded-2xl border border-slate-200 bg-white/80 p-4 dark:border-white/10 dark:bg-slate-950/40">
+            <p class="text-xs uppercase tracking-[0.2em] text-slate-400">Personal</p>
+            <p class="mt-2 text-sm text-slate-600 dark:text-slate-200">担当ラベルごとに名前を登録</p>
+          </div>
+          <div class="rounded-2xl border border-slate-200 bg-white/80 p-4 dark:border-white/10 dark:bg-slate-950/40">
+            <p class="text-xs uppercase tracking-[0.2em] text-slate-400">Clear</p>
+            <p class="mt-2 text-sm text-slate-600 dark:text-slate-200">結果は表でそのまま見やすく表示</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel p-6 sm:p-8">
+        <div class="flex items-start justify-between gap-4">
+          <div>
+            <p class="text-sm font-medium uppercase tracking-[0.2em] text-slate-400">Schedule Builder</p>
+            <h2 class="mt-2 text-2xl font-semibold text-slate-900 dark:text-white">当番表を作成</h2>
+          </div>
+          <div class="hidden rounded-2xl border border-slate-200 bg-white px-4 py-3 text-right shadow-soft dark:border-white/10 dark:bg-white/5 dark:shadow-none sm:block">
+            <p class="text-xs uppercase tracking-[0.2em] text-slate-400">Powered by</p>
+            <p class="mt-1 text-sm font-medium text-slate-700 dark:text-slate-100">Ruby.wasm</p>
+          </div>
+        </div>
+
+        <div class="mt-8 space-y-5">
+          <div class="field">
+            <div class="flex items-center justify-between gap-3">
+              <label class="field-label" for="startDate">開始日</label>
+              <span class="rounded-full bg-slate-100 px-3 py-1 text-xs text-slate-500 dark:bg-white/5 dark:text-slate-300">カレンダー対応</span>
+            </div>
+            <input class="field-input" id="startDate" type="date" value="2026-04-03" />
+          </div>
+
+          <div class="grid gap-5 sm:grid-cols-2">
+            <div class="field">
+              <div class="flex items-center justify-between gap-3">
+                <label class="field-label" for="memberCount">人数</label>
+                <button id="openMemberModal" type="button" class="text-sm font-medium text-teal-700 transition hover:text-teal-600 dark:text-teal-300 dark:hover:text-teal-200">
+                  名前を設定
+                </button>
+              </div>
+              <input class="field-input" id="memberCount" type="number" min="1" max="52" value="8" />
+              <p id="memberSummary" class="text-sm text-slate-500 dark:text-slate-400"></p>
+            </div>
+
+            <div class="field">
+              <label class="field-label" for="weeks">何週間分</label>
+              <input class="field-input" id="weeks" type="number" min="1" value="8" />
+            </div>
+          </div>
+
+          <button
+            id="generateButton"
+            disabled
+            class="inline-flex w-full items-center justify-center rounded-2xl bg-teal-500 px-5 py-3.5 text-base font-semibold text-white transition hover:bg-teal-600 disabled:cursor-not-allowed disabled:bg-slate-300 disabled:text-slate-500 dark:text-slate-950 dark:hover:bg-teal-400 dark:disabled:bg-slate-700 dark:disabled:text-slate-400"
+          >
+            当番表を作成する
+          </button>
+        </div>
+
+        <div class="mt-6 space-y-4">
+          <div id="loading">Ruby.wasm を初期化しています...</div>
+          <div id="error"></div>
+          <div id="copyFeedback" class="hidden rounded-2xl border border-sky-200 bg-sky-50 px-4 py-3 text-sm text-sky-700 dark:border-sky-400/20 dark:bg-sky-400/10 dark:text-sky-200"></div>
+          <div id="result"></div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <div
+    id="memberModal"
+    class="fixed inset-0 z-50 hidden items-center justify-center bg-slate-950/45 px-4 py-8 backdrop-blur-sm"
+    aria-hidden="true"
+  >
+    <div class="panel w-full max-w-2xl p-6 sm:p-8">
+      <div class="flex items-start justify-between gap-4">
+        <div>
+          <p class="text-sm font-medium uppercase tracking-[0.2em] text-slate-400">Member Names</p>
+          <h3 class="mt-2 text-2xl font-semibold text-slate-900 dark:text-white">担当名を設定</h3>
+          <p class="mt-2 text-sm leading-6 text-slate-500 dark:text-slate-300">
+            記号ごとに名前を登録できます。未設定の担当はそのままアルファベットで表示されます。
+          </p>
+        </div>
+        <button id="closeMemberModal" type="button" class="secondary-button px-3 py-2" aria-label="閉じる">閉じる</button>
+      </div>
+
+      <div class="mt-6 rounded-3xl border border-slate-200 bg-slate-50/80 p-4 dark:border-white/10 dark:bg-slate-950/40">
+        <p class="text-sm text-slate-500 dark:text-slate-300">
+          対象メンバー: <span id="memberNameCount" class="font-semibold text-slate-700 dark:text-white"></span>
+        </p>
+      </div>
+
+      <div id="memberNameList" class="mt-6 grid max-h-[50vh] gap-4 overflow-y-auto pr-1 sm:grid-cols-2"></div>
+
+      <div class="mt-6 flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
+        <button id="resetMemberNames" type="button" class="secondary-button">名前をクリア</button>
+        <button id="saveMemberNames" type="button" class="inline-flex items-center justify-center rounded-2xl bg-teal-500 px-5 py-3 text-sm font-semibold text-white transition hover:bg-teal-600 dark:text-slate-950 dark:hover:bg-teal-400">
+          保存する
+        </button>
+      </div>
+    </div>
   </div>
 
-  <div class="row">
-    <label for="memberCount">人数</label>
-    <input id="memberCount" type="number" min="1" max="52" value="8" />
-  </div>
-
-  <div class="row">
-    <label for="weeks">何週間分</label>
-    <input id="weeks" type="number" min="1" value="8" />
-  </div>
-
-  <button id="generateButton" disabled>当番表を作成する</button>
-
-  <div id="loading">Ruby.wasm を初期化しています...</div>
-  <div id="error"></div>
-  <div id="result"></div>
-
-  <script type="module" src="./app.js?v=5"></script>
+  <script type="module" src="./app.js?v=7"></script>
 </body>
 </html>

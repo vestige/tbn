@@ -5,7 +5,7 @@ def make_members(count)
   labels = ("A".."Z").to_a + ("a".."z").to_a
   raise ArgumentError, "人数は最大 #{labels.length} 人までです。" if count > labels.length
 
-  labels.first(count).map { |label| "#{label}さん" }
+  labels.first(count)
 end
 
 def generate_schedule(start_date_str, member_count, weeks)
