@@ -1,25 +1,20 @@
 import { DefaultRubyVM } from "https://cdn.jsdelivr.net/npm/@ruby/4.0-wasm-wasi@2.9.0/dist/browser/+esm";
 
 window.addEventListener("DOMContentLoaded", () => {
+  console.log("app.js loaded");
+
   const button = document.getElementById("generateButton");
   const loadingEl = document.getElementById("loading");
   const errorEl = document.getElementById("error");
   const resultEl = document.getElementById("result");
-
   const startDateInput = document.getElementById("startDate");
   const memberCountInput = document.getElementById("memberCount");
   const weeksInput = document.getElementById("weeks");
 
+  console.log({ button, loadingEl, errorEl, resultEl, startDateInput, memberCountInput, weeksInput });
+
   if (!button || !loadingEl || !errorEl || !resultEl || !startDateInput || !memberCountInput || !weeksInput) {
-    console.error("必要なHTML要素が見つかりませんでした", {
-      button,
-      loadingEl,
-      errorEl,
-      resultEl,
-      startDateInput,
-      memberCountInput,
-      weeksInput
-    });
+    errorEl.textContent = "HTML要素の取得に失敗しました。index.html の id を確認してください。";
     return;
   }
 
@@ -43,16 +38,14 @@ window.addEventListener("DOMContentLoaded", () => {
     `).join("");
 
     resultEl.innerHTML = `
-      <table>
+      <table border="1" cellspacing="0" cellpadding="6">
         <thead>
           <tr>
             <th>日付</th>
             <th>担当</th>
           </tr>
         </thead>
-        <tbody>
-          ${rows}
-        </tbody>
+        <tbody>${rows}</tbody>
       </table>
     `;
   }
@@ -68,7 +61,7 @@ window.addEventListener("DOMContentLoaded", () => {
     vm.eval(rubyCode);
 
     button.disabled = false;
-    loadingEl.textContent = "準備完了です。入力して実行できます。";
+    loadingEl.textContent = "準備完了です。";
   }
 
   button.addEventListener("click", () => {
@@ -76,6 +69,10 @@ window.addEventListener("DOMContentLoaded", () => {
     resultEl.innerHTML = "";
 
     try {
+      if (!vm) {
+        throw new Error("Ruby.wasm の初期化がまだ終わっていません。");
+      }
+
       const startDate = startDateInput.value;
       const memberCount = Number(memberCountInput.value);
       const weeks = Number(weeksInput.value);
