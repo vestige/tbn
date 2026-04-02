@@ -3,33 +3,95 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Touban Maker</title>
+  <title>Toban Maker</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      max-width: 760px;
+      margin: 40px auto;
+      padding: 0 16px;
+      line-height: 1.6;
+    }
+
+    .row {
+      margin: 12px 0;
+    }
+
+    label {
+      display: block;
+      font-weight: bold;
+      margin-bottom: 4px;
+    }
+
+    input {
+      width: 100%;
+      max-width: 240px;
+      padding: 8px;
+      font-size: 16px;
+    }
+
+    button {
+      margin-top: 16px;
+      padding: 10px 16px;
+      font-size: 16px;
+      cursor: pointer;
+    }
+
+    #loading {
+      margin-top: 12px;
+      color: #666;
+    }
+
+    #error {
+      margin-top: 12px;
+      color: #c62828;
+      white-space: pre-wrap;
+    }
+
+    #result {
+      margin-top: 20px;
+    }
+
+    table {
+      border-collapse: collapse;
+      width: 100%;
+    }
+
+    th, td {
+      border: 1px solid #ccc;
+      padding: 8px;
+      text-align: left;
+    }
+
+    th {
+      background: #f3f6ff;
+    }
+  </style>
 </head>
 <body>
-  <h1>Touban Maker</h1>
+  <h1>Toban Maker</h1>
 
-  <div>
+  <div class="row">
     <label for="startDate">開始日</label>
     <input id="startDate" type="date" value="2026-04-03" />
   </div>
 
-  <div>
+  <div class="row">
     <label for="memberCount">人数</label>
     <input id="memberCount" type="number" min="1" max="52" value="8" />
   </div>
 
-  <div>
+  <div class="row">
     <label for="weeks">何週間分</label>
     <input id="weeks" type="number" min="1" value="8" />
   </div>
 
   <button id="generateButton" disabled>当番表を作成する</button>
 
-  <div id="loading">Ruby.wasm を読み込み中です...</div>
+  <div id="loading">Ruby.wasm を初期化しています...</div>
   <div id="error"></div>
   <div id="result"></div>
 
-  <script src="https://cdn.jsdelivr.net/npm/@ruby/3.4-wasm-wasi@2.7.2/dist/browser.script.iife.js"></script>
-  <script type="module" src="./app.js?v=4"></script>
+  <script type="module" src="./app.js?v=5"></script>
 </body>
 </html>
