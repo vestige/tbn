@@ -1,8 +1,4 @@
-import { DefaultRubyVM } from "https://cdn.jsdelivr.net/npm/@ruby/4.0-wasm-wasi@latest/dist/browser/+esm";
-
-window.addEventListener("DOMContentLoaded", () => {
-  console.log("app.js loaded");
-
+window.addEventListener("DOMContentLoaded", async () => {
   const button = document.getElementById("generateButton");
   const loadingEl = document.getElementById("loading");
   const errorEl = document.getElementById("error");
@@ -11,14 +7,10 @@ window.addEventListener("DOMContentLoaded", () => {
   const memberCountInput = document.getElementById("memberCount");
   const weeksInput = document.getElementById("weeks");
 
-  console.log({ button, loadingEl, errorEl, resultEl, startDateInput, memberCountInput, weeksInput });
-
   if (!button || !loadingEl || !errorEl || !resultEl || !startDateInput || !memberCountInput || !weeksInput) {
-    errorEl.textContent = "HTML要素の取得に失敗しました。index.html の id を確認してください。";
+    console.error("必要なHTML要素が見つかりません");
     return;
   }
-
-  let vm = null;
 
   function escapeHtml(text) {
     return String(text)
@@ -50,51 +42,82 @@ window.addEventListener("DOMContentLoaded", () => {
     `;
   }
 
-  async function initRuby() {
+  try {
     loadingEl.textContent = "Ruby.wasm を初期化しています...";
 
-    const response = await fetch("https://cdn.jsdelivr.net/npm/@ruby/4.0-wasm-wasi@latest/dist/ruby+stdlib.wasm");
-    const module = await WebAssembly.compileStreaming(response);
-    vm = await DefaultRubyVM(module);
+    const rubyCode = await fetch("./tbn_wa.rb").then((r) => {
+      if (!r.ok) throw new Error(`tbn_wa.rb の読み込みに失敗: ${r.status}`);
+      return r.text();
+    });
 
-    const rubyCode = await fetch("./tbn_wa.rb").then((r) => r.text());
-    vm.eval(rubyCode);
+    const script = document.createElement("script");
+    script.type = "text/ruby";
+    script.textContent = `
+      ${rubyCode}
 
-    button.disabled = false;
-    loadingEl.textContent = "準備完了です。";
-  }
+      require "js"
+      document = JS.global[:document]
 
-  button.addEventListener("click", () => {
-    errorEl.textContent = "";
-    resultEl.innerHTML = "";
+      button = document.getElementById("generateButton")
+      error_el = document.getElementById("error")
+      result_el = document.getElementById("result")
+      start_date_input = document.getElementById("startDate")
+      member_count_input = document.getElementById("memberCount")
+      weeks_input = document.getElementById("weeks")
 
-    try {
-      if (!vm) {
-        throw new Error("Ruby.wasm の初期化がまだ終わっていません。");
-      }
+      def escape_html(text)
+        text
+          .gsub("&", "&amp;")
+          .gsub("<", "&lt;")
+          .gsub(">", "&gt;")
+          .gsub('"', "&quot;")
+          .gsub("'", "&#39;")
+      end
 
-      const startDate = startDateInput.value;
-      const memberCount = Number(memberCountInput.value);
-      const weeks = Number(weeksInput.value);
+      def render_result(schedule)
+        rows = schedule.map do |item|
+          "<tr><td>#{escape_html(item["date"])}</td><td>#{escape_html(item["person"])}</td></tr>"
+        end.join
 
-      const rubyExpr = `
-        generate_schedule(
-          ${JSON.stringify(startDate)},
-          ${memberCount},
-          ${weeks}
-        )
-      `;
+        <<~HTML
+          <table border="1" cellspacing="0" cellpadding="6">
+            <thead>
+              <tr>
+                <th>日付</th>
+                <th>担当</th>
+              </tr>
+            </thead>
+            <tbody>#{rows}</tbody>
+          </table>
+        HTML
+      end
 
-      const json = vm.eval(rubyExpr).toString();
-      const items = JSON.parse(json);
-      renderTable(items);
-    } catch (error) {
-      errorEl.textContent = `エラー: ${error.message}`;
-    }
-  });
+      click_handler = JS::Function.new(-> (*_) do
+        begin
+          error_el[:textContent] = ""
+          result_el[:innerHTML] = ""
 
-  initRuby().catch((error) => {
+          start_date = start_date_input[:value].to_s
+          member_count = member_count_input[:value].to_s.to_i
+          weeks = weeks_input[:value].to_s.to_i
+
+          json = generate_schedule(start_date, member_count, weeks)
+          schedule = JSON.parse(json)
+
+          result_el[:innerHTML] = render_result(schedule)
+        rescue => e
+          error_el[:textContent] = "エラー: #{e.message}"
+        end
+      end)
+
+      button.addEventListener("click", click_handler)
+      button[:disabled] = false
+      document.getElementById("loading")[:textContent] = "準備完了です。"
+    `;
+
+    document.body.appendChild(script);
+  } catch (error) {
     loadingEl.textContent = "";
     errorEl.textContent = `初期化エラー: ${error.message}`;
-  });
+  }
 });
