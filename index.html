@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Touban Lsit</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      max-width: 720px;
+      margin: 40px auto;
+      padding: 0 16px;
+      line-height: 1.6;
+    }
+    label {
+      display: block;
+      margin-top: 12px;
+    }
+    input, button {
+      font-size: 16px;
+      padding: 8px;
+      margin-top: 4px;
+    }
+    button {
+      margin-top: 16px;
+      cursor: pointer;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 24px;
+    }
+    th, td {
+      border: 1px solid #ccc;
+      padding: 8px;
+      text-align: left;
+    }
+    .error {
+      color: red;
+      margin-top: 16px;
+    }
+  </style>
+</head>
+<body>
+  <h1>Touban Lsit</h1>
+
+  <label>
+    開始日付
+    <input type="date" id="startDate" value="2026-04-03" />
+  </label>
+
+  <label>
+    人数
+    <input type="number" id="memberCount" value="8" min="1" max="52" />
+  </label>
+
+  <label>
+    何週間分
+    <input type="number" id="weeks" value="8" min="1" />
+  </label>
+
+  <button id="runButton">作成する</button>
+
+  <div id="error" class="error"></div>
+  <div id="result"></div>
+
+  <script type="module" src="./app.js"></script>
+</body>
+</html>
